@@ -1,0 +1,236 @@
+---
+sidebar_position: 1
+title: 群组业务概述
+---
+
+# 群组业务概述
+
+群聊是即时通讯类应用中常见的多人通讯方式，一般包含两个及以上的用户。融云的群组业务支持丰富的群组成员管理、禁言管理等特性，支持离线消息推送和历史消息记录漫游，可用于兴趣群、办公群、客服服务沟通等。
+
+群组业务要点如下：
+
+- 即时通讯服务只负责将消息传达给群组中的所有用户，默认不维护群组成员的资料（头像、名称、群成员名片等），如果需要将群组及群成员资料信息托管在融云，可使用用户信息托管功能（该功能已默认开通）服务后，使用托管服务中提供的群组管理功能，进行群组资料的管理和维护。
+- 未使用融云信息托管服务时，创建/解散/加入/退出群组等群组管理操作，必须由 App 服务器请求即时通讯服务端 API 实现。即时通讯客户端 SDK 不提供相应方法。详见下方[群组管理功能](#群组管理功能)。
+- 融云信息托管服务中提供全新群组管理能力，支持通过服务端 API 和客户端 SDK 进行群组管理。
+- App Key 下可创建的群组数量没有限制，单个群组成员上限为 3000 人。如需修改群组成员上限，可咨询融云商务。  
+{/*public-cloud-only end*/}
+- 单个用户可加入的群组数量无限制。{/*public-cloud-only start*/}
+- 从控制台 IM 服务的[服务购买]页面为 App Key 开启**单群聊消息云端存储**服务后，可使用融云提供的消息存储服务，实现消息历史记录漫游。**IM 旗舰版**或**IM 尊享版**可开通该服务。具体功能与费用以[融云官方价格说明](https://www.rongcloud.cn/pricing)页面及[计费说明](https://help.rongcloud.cn/t/topic/123)文档为准。{/*public-cloud-only end*/}
+
+## 服务配置
+
+群组业务的部分基础功能与增值服务可以在控制台 IM 服务的[服务购买]和[服务配置]页面进行开通和配置，如果需要将群组及群成员资料信息托管在融云，可使用用户信息托管功能（该功能已默认开通）。
+
+## 客户端 SDK 使用须知
+
+:::tip
+
+ - 仅 IMKit 提供开箱即用的群聊会话 UI 组件。IMLib 不提供开箱即用的群聊会话 UI 组件。IMKit 依赖 IMLib，因此 IMKit 具备 IMLib 的全部能力。
+ - 通过信息托管服务创建的群组，支持通过客户端 SDK 管理群组功能，SDK 从 5.12.0 版本开始支持此功能。
+ - 不是通过信息托管服务创建的群组，客户端不提供群组管理的 API。群组管理需要由 App 服务端调用相应的融云服务端 API（Server API）接口完成。或将已创建的群组，通过服务端接口导入到信息托管服务后，可通过客户端 SDK 管理群组功能。
+:::
+
+
+## 群组管理功能
+
+默认情下，融云不托管用户信息，也不管理群组的业务逻辑，因此群的业务逻辑全部需要在 App 服务器进行实现。未开启使用融云信息托管服务时，群主、群管理员、群公告、邀请入群、群号搜索等均为群组业务逻辑，需在 App 侧自行实现。如果您希望将群组及群成员资料信息托管在融云，请开启用户信息托管。
+
+:::tip
+ - 使用信息托管服务，在进行群组管理操作时，群成员会收到操作状态通知回调，如：创建、主动加入、邀请加入、踢出、退出、解散、添加管理员、移除管理员、转移群主等，因为通知使用消息方式实现，所以将计入群消息的分发和下行数据统计。
+ - 通过非托管功能创建群组，如果需要使用群组托管能力，需要调用“导入群托管数据”接口，设置群组所有者（群主）及群组的默认权限后才能使用。
+:::
+
+<Tabs
+  defaultValue="nonprofile"
+  values={[
+    {label: '未开启用户信息托管的群组', value: 'nonprofile'},
+    {label: '开启用户信息托管的群组', value: 'profile'}, 
+  ]}>
+  <TabItem value="nonprofile">
+
+下表列出了即时通讯服务端提供的非托管能力的群组基础管理接口。注意，群组管理需要由 App 后端调用相应的即时通讯服务端 API（Server API）接口完成。开通信息托管服务后客户端可针对托管的群组提供管理 API。
+
+| 功能分类                 | 功能描述 | 融云服务端 API        |
+|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------|
+| 创建、解散群组            | 提供创建者用户 ID、群组 ID、和群名称，向融云服务端申请建群。如解散群组，则群成员关系不复存在。                                                                                                                                            | [创建群组]、[解散群组] |
+| 加入、退出群组            | 加入群组后，默认可查看入群以后产生的新消息。退出群组后，不再接收该群的新消息。                                                                                                                                                          | [加入群组]、[退出群组] |
+| 修改融云服务端的群组信息 | 修改在融云推送服务中使用的群组信息。                                                                                                                                                                                                 | [刷新群组信息]        |
+| 查询群组成员             | 查询指定群组所有成员的用户 ID 信息。                                                                                                                                                                                                 | [查询群组成员]        |
+| 查询用户所在群组         | 根据用户 ID 查询该用户加入的所有群组，返回群组 ID 及群组名称。融云不存储群组资料信息，群组资料及群成员信息需要开发者在应用服务器自行维护，如应用服务端维护的用户群组关系有缺失时，可通过此接口来核对校验。                                | [查询用户所在群组]    |
+| 同步用户所在群组         | 向融云服务端同步指定用户当前所加入的所有群组，防止应用中的用户群组信息与融云服务端的用户所属群信息不一致。如果在集成融云服务前 App Server 上已有群组及成员数据，第一次连接融云服务器时，可使用此接口向融云同步已有的用户与群组对应关系。 | [同步用户所在群组]    |
+| 群组单人禁言             | 在指定的单个群组中或全部群组中，禁言一个或多个用户。被禁言用户可以接收查看群组中其他用户消息，但不能通过客户端 SDK 发送消息。                                                                                                           | [单人禁言]            |
+| 群组全体禁言             | 将群组全体成员禁言。被禁言群组的所有成员均不能发送消息，需要某些用户可以发言时，可将此用户加入到群禁言用户白名单中。                                                                                                                    | [全体禁言]            |
+| 群组禁言用户白名单       | 群组被整体禁言后，禁言白名单中用户可以发送群消息。                                                                                                                                                                                    | [全体成员禁言白名单]  |
+
+</TabItem>
+<TabItem value="profile">
+
+信息托管服务中支持的群组托管功能接口如下：
+
+| 功能分类 |功能描述| 客户端 API | 融云服务端 API |
+| :--------|:------------------ |:---|:-----------------------------|
+| 创建群组 | 创建一个群组，默认群主为创建者。 |[创建群组（客户端）-托管] | [创建群组（服务端）-托管] |
+| 群组资料设置 | 提供修改群组的名称、头像、简介等内置信息及自定义的群组资料信息。 |[群组资料设置（客户端）-托管] | [群组资料设置（服务端）-托管] |
+| 批量获取群组资料 | 获取指定多个群组的资料信息。 |[批量获取群组资料（客户端）-托管] | [批量获取群组资料（服务端）-托管] |
+| 踢出群组 | 指定用户踢出群组，只有具有踢出权限的用户可以进行此操作。 |[踢出群组（客户端）-托管] | [踢出群组（服务端）-托管] |
+| 群组转让 | 将群主角色转让给群组中其他成员，转让后可选择是否在群组中或退出群组。 |[群组转让（客户端）-托管] | [群组转让（服务端）-托管] |
+| 加入群组 | 用户加入指定群组，用户加入的群组数没有上限限制。 |[加入群组（客户端）-托管] | [加入群组（服务端）-托管] |
+| 退出群组 | 用户退出指定群组，退出后不再接收该群的新消息。 |[退出群组（客户端）-托管] | [退出群组（服务端）-托管] |
+| 解散群组 | 将指定群组解散，只有角色为群主的用户可以进行解散操作，解散后群成员关系不复存在。 |[解散群组（客户端）-托管] | [解散群组（服务端）-托管] |
+| 指定用户踢出所有群组 | 将指定用户从所有不是群主角色的群组中踢出，该用户所有群主角色的群需要先转让群主后才能退出群组。 | 无 | [指定用户踢出所有群组（服务端）-托管] |
+| 设置群管理员 | 设置指定一个群的成员为群管理员。 |[设置群管理员（客户端）-托管] | [设置群管理员（服务端）-托管] |
+| 移除群管理员 | 移除管理员权限，将群管理员角色设置为普通群成员。 |[移除群管理员（客户端）-托管] | [移除群管理员（服务端）-托管] |
+| 分页获取群成员信息 | 分页方式获取指定一个群组的成员信息。 |[分页获取群成员信息（客户端）-托管] | [分页获取群成员信息（服务端）-托管] |
+| 获取指定群成员信息 | 获取一个群组中指定多个成员的资料信息。 |[获取指定群成员信息（客户端）-托管] | [获取指定群成员信息（服务端）-托管] |
+| 设置群成员资料 | 设置一个群成员的备注名及自定义附加信息。 |[设置群成员资料（客户端）-托管] | [设置群成员资料（服务端）-托管] |
+| 群名称备注名设置 | 设置用户所在指定群组的群名称备注名，设置后该备注名只对设置用户有效，其他群成员不可见。 |[群名称备注名设置（客户端）-托管] | [群名称备注名设置（服务端）-托管] |
+| 特别关注群成员 | 特别关注指定群成员后，该成员发送的消息不受免打扰的影响。 |[特别关注群成员（客户端）-托管] | [特别关注群成员（服务端）-托管] |
+| 分页查询应用下群组 | 分页方式获取指定 AppKey 下的群组列表。 | 无 | [分页查询应用下群组（服务端）-托管] |
+| 分页查询用户加入的群组 | 分页方式获取用户加入的所有群组列表。 |[分页查询用户加入的群组（客户端）-托管] | [分页查询用户加入的群组（服务端）-托管] |
+| 群组托管导入功能 | 针对不是使用群托管功能创建的群组，需要先通过此接口设置群主及群权限后，才能调用群托管相关功能。 |无 | [群组托管导入功能（服务端）-托管] |
+
+</TabItem>
+</Tabs>
+
+## 群聊消息功能
+
+群聊消息功能与单聊业务类似，共用部分 API 及配置。
+
+| 功能             | 描述                                                                                                                                              | 客户端 API                  | 融云服务端 API                  |
+|:---------------|:------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------|:-----------------------------|
+| 发送消息         | 可发送普通消息与媒体消息，例如文本、图片、GIF 等，或自定义消息。支持在发送消息时添加 @ 信息。                                                           | [发送消息]                  | [发送群聊消息]                  |
+| 发送群聊定向消息 | 可发送普通消息与媒体消息给群组中的指定的一个或多个成员，其他成员不会收到该消息。                                                                    | [发送群定向消息]            | [发送群聊定向消息]              |
+| 接收消息         | 监听并实时接收消息，或在客户端上线时接收离线消息。                                                                                                  | [接收消息]                  | 不适用                          |
+| 群聊消息已读回执 | 发送群消息后如需要查看消息的阅读状态，需要先发送回执请求，在通过接受者的响应获取已读数据。                                                           | [单群聊已读回执]            | 不适用                          |
+| 离线消息         | 支持离线消息存储，存储时间可设置（1 ～ 7 天），默认存储 7 天内的所有群消息，支持调整存储时长与存储的群消息数量。                                         | [管理离线消息存储配置]      | 不提供该 API                    |
+| 离线消息推送     | 离线状态下，群组中有新消息时，支持 Push 通知。                                                                                                       | [Android 推送开发指南]      | 不提供该 API                    |
+| 撤回消息         | 消息发送成功后可撤回该条消息。                                                                                                                     | [撤回消息][撤回消息-client] | [撤回消息][撤回消息-server-api] |
+| 本地搜索消息     | 消息存储在本地（移动端），支持按关键字或用户搜索本地指定会话的消息内容。                                                                              | [搜索消息]                  | 不提供该 API                    |
+| 获取历史消息     | 从本地数据库或远端获取历史消息。注意，从远端获取历史消息需要开通**单群聊消息云端存储**服务，默认存储时长为 6 个月。                                     | [获取历史消息]              | 不提供该 API                    |
+| 获取历史消息日志 | 融云服务端可以保存 APP 内所有会话的历史消息记录，历史消息记录以日志文件方式提供，并已经过压缩。您可以使用服务端 API 获取、删除指定 App 的历史消息日志 | 不提供该 API                | [获取历史消息日志]              |
+| 本地插入消息     | 在本地数据库中插入消息。本地插入的消息不会实际发送给服务器和对方。                                                                                  | [插入消息]                  | 不适用                          |
+| 删除消息         | 支持按会话删除本地和存储在服务器的指定消息或会话中全部历史消息。                                                                                   | [删除消息]                  | [消息清除]                      |
+| 单群聊消息扩展   | 为原始消息增加状态标识（扩展数据为 KV 键值对），提供添加、删除、查询扩展信息的接口。                                                                    | [消息扩展]                  | [单/群聊消息扩展]               |
+| 自定义消息类型   | 如果内置消息类型满足不了您的需求，可以自定义消息类型。支持自定义普通消息类型与自定义媒体消息类型。                                                   | [自定义消息类型]            | 不适用                          |
+
+默认新入群的成员的用户仅可接收加入群组后产生的消息。如果需要查看入群之前的历史消息，请为 App Key 开启以下两项服务（请注意区分**开发**/**生产**环境）{/*public-cloud-only start*/}：
+
+从控制台 IM 服务的[服务购买]页面开启**单群聊消息云端存储**服务。开启该服务后，可使用融云提供的消息存储服务，实现消息历史记录漫游。**IM 旗舰版**或**IM 尊享版**可开通该服务。具体功能与费用以[融云官方价格说明](https://www.rongcloud.cn/pricing)页面及[计费说明](https://help.rongcloud.cn/t/topic/123)文档为准。
+- 从控制台[功能配置]页面开启**新用户获取加入群组前历史消息**。{/*public-cloud-only en d*/}
+
+## 群聊会话功能
+
+群聊会话功能与单聊业务类似，共用部分 API 及配置。
+
+| 功能                        | 描述                                                                                                                           | 客户端 API                              | 融云服务端 API                              |
+|:--------------------------|:-----------------------------------------------------------------------------------------------------------------------------|:-------------------------------------|:-----------------------------------------|
+| 获取会话                    | SDK 会根据收发的消息在本地数据库中生成对应会话。您可以从本地数据库获取 SDK 生成的会话列表。                                      | [获取会话]                              | 不提供该 API                                |
+| 获取会话未读消息            | 从指定会话中获取未读消息，可满足 App 跳转到第一条未读消息、展示全部未读 @ 消息的需求。                                            | [获取会话未读消息]                      | 不提供该 API                                |
+| 处理会话未读消息数          | 获取或清除会话中的未读消息数，可用于 UI 展示。                                                                                   | [处理会话未读消息数]                    | 不提供该 API                                |
+| 删除会话                    | 从 SDK 生成的会话列表中删除一个会话或多个会话                                                                                  | [删除会话]                              | 不提供该 API                                |
+| 会话草稿                    | 保存一条草稿内容至指定会话。                                                                                                    | [会话草稿]                              | 不提供该 API                                |
+| 输入状态                    | 可设置指定的群聊会话，收到新的消息后是否进行提醒，默认进行新消息提醒。                                                            | [输入状态]                              | 不提供该 API                                |
+| 管理会话标签                | 创建和管理标签信息数据，用于对会话进行标记分组。每个用户最多可以创建 20 个标签。App 用户创建的标签信息数据会同步融云服务端。       | [管理标签信息数据]                      | 不提供该 API                                |
+| 设置与使用会话标签          | 使用会话标签对会话进行分组。                                                                                                    | [设置与使用会话标签]                    | 不提供该 API                                |
+| 会话置顶                    | 在会话列表中将指定会话置顶。                                                                                                    | [会话置顶][会话置顶-client]             | [会话置顶][会话置顶-server-api]             |
+| 会话免打扰                  | 控制用户在客户端设备离线时，是否可针对离线消息接收推送通知。支持按照会话或按会话类型设置免打扰。                                  | [免打扰功能概述][免打扰功能概述-client] | [免打扰功能概述][免打扰功能概述-server-api] |
+| 多端同步会话免打扰/置顶状态 | SDK 提供了会话状态（置顶或免打扰）同步机制，通过设置会话状态同步监听器，当在其它端修改会话状态时，可在本端实时监听到会话状态的改变。 | [多端同步免打扰/置顶]                   | 不适用                                      |
+| 多端同步阅读状态            | 在同一用户账户的多个设备间主动同步会话的阅读状态。                                                                              | [多端同步阅读状态]                      | 不适用                                      |
+{/*public-cloud-only start*/}
+## 与聊天室和超级群的区别
+
+您可以通过以下文档了解业务类型之间的区别及所有功能：
+
+- [即时通讯开发指导 · 业务类型介绍](/guides/realtime-chat/intro-chat#功能特性)
+- [IM 尊享版、IM 旗舰版功能对照表](https://help.rongcloud.cn/t/topic/121)
+{/*public-cloud-only end*/}
+{/*  链接区域  */}
+[提交工单]: https://console.rongcloud.cn/agile/formwork/ticket/create
+[服务购买]: https://console.rongcloud.cn/agile/im/service/purchase
+[服务配置]: https://console.rongcloud.cn/agile/im/service/config
+{/*  client api */}
+[发送消息]: ../message/send.md
+[接收消息]: ../message/receive.md
+[获取历史消息]: ../message/get-history.md
+[插入消息]: ../message/insert.md
+[删除消息]: ../message/delete.md
+[撤回消息-client]: ../message/recall.md
+[搜索消息]: ../message/search.md
+[单群聊已读回执]: ../message/read-receipt-1v1-group.md
+[消息扩展]: ../message/expansion.md
+[自定义消息类型]: ../message/customize.md
+[管理离线消息存储配置]: ../message/manage-offline-message-duration.md
+[获取会话]: ../conversation/get.md
+[处理会话未读消息数]: ../conversation/handle-unread-count.md
+[获取会话未读消息]: ../conversation/get-unread-message.md
+[删除会话]: ../conversation/delete.md
+[会话草稿]: ../conversation/draft.md
+[输入状态]: ../conversation/typing-status.md
+[管理标签信息数据]: ../conversation/manage-tag-info.md
+[设置与使用会话标签]: ../conversation/tag.md
+[会话置顶-client]: ../conversation/stick-to-top.md
+[免打扰功能概述-client]: ../conversation/do-not-disturb-about.md
+[多端同步免打扰/置顶]: ../conversation/share-conversation-status-between-clients.md
+[多端同步阅读状态]: ../conversation/share-unread-status-between-clients.md
+[发送群定向消息]: ../group/direct.md
+[Android 推送开发指南]: ../push/overview.mdx
+{/* Server API  */}
+[发送群聊消息]: /platform-chat-api/message/send-group
+[发送群聊定向消息]: /platform-chat-api/message/send-group
+[单/群聊消息扩展]: /platform-chat-api/message/expansion-about
+[撤回消息-server-api]: /platform-chat-api/message/msgrecall
+[获取历史消息日志]: /platform-chat-api/message/get-message-history-log
+[消息清除]: /platform-chat-api/message/delete
+[创建群组]: /platform-chat-api/group/create-group
+[解散群组]: /platform-chat-api/group/dismiss-group
+[加入群组]: /platform-chat-api/group/join-group
+[退出群组]: /platform-chat-api/group/quit-group
+[查询群组成员]: /platform-chat-api/group/query-group-member
+[同步用户所在群组]: /platform-chat-api/group/sync-group
+[查询用户所在群组]: /platform-chat-api/group/query-group-by-user
+[刷新群组信息]: /platform-chat-api/group/refresh-group-info
+[单人禁言]: /platform-chat-api/group/mute/gag-user
+[全体禁言]: /platform-chat-api/group/mute/ban-group
+[全体成员禁言白名单]: /platform-chat-api/group/mute/add-to-group-ban-whitelist
+[会话置顶-server-api]: /platform-chat-api/conversation/top
+[免打扰功能概述-server-api]: /platform-chat-api/push/do-not-disturb-about
+[聊天室消息优先级服务]: /platform-chat-api/chatroom/message-priority/add-low-priority-message-type
+[聊天室白名单服务]: /platform-chat-api/chatroom/whitelist/whitelist-service-about
+{/* 托管的接口-客户端 */}
+[创建群组（客户端）-托管]:./group-manage.md#create-group
+[群组资料设置（客户端）-托管]:./group-manage#修改群组资料
+[批量获取群组资料（客户端）-托管]:./group-info#获取群组资料
+[踢出群组（客户端）-托管]:./group-manage#踢出群组
+[群组转让（客户端）-托管]:./group-manage#转让群组
+[加入群组（客户端）-托管]:./join-group#加入群组管理
+[退出群组（客户端）-托管]:./group-manage#退出群组
+[解散群组（客户端）-托管]:./group-manage#解散群组
+[设置群管理员（客户端）-托管]:./group-member-manager#添加群管理员
+[移除群管理员（客户端）-托管]:./group-member-manager#移除群管理员
+[分页获取群成员信息（客户端）-托管]:./group-member-manager#分页获取群成员信息
+[获取指定群成员信息（客户端）-托管]:./group-member-manager#获取群成员信息
+[设置群成员资料（客户端）-托管]:./group-member-manager#设置群成员信息
+[群名称备注名设置（客户端）-托管]:./group-manage#设置群组备注名
+[特别关注群成员（客户端）-托管]:./group-member-manager#特别关注群成员
+[分页查询用户加入的群组（客户端）-托管]:./group-info#获取指定已加入群组的资料
+
+{/* 托管的接口-服务端 */}
+[创建群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/create-group
+[解散群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/diss-group
+[群组资料设置（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/update-group
+[批量获取群组资料（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/query-group-profiles
+[踢出群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/kick-group
+[群组转让（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/transfer-group
+[加入群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/join-group
+[退出群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/quit-group
+[指定用户踢出所有群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/kick-mem-all-group
+[设置群管理员（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/add-group-manager
+[移除群管理员（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/remove-group-manager
+[分页获取群成员信息（服务端）-托管]: /platform-chat-api/group/group-profile/group-member/query-group-member
+[获取指定群成员信息（服务端）-托管]: /platform-chat-api/group/group-profile/group-member/query-specific-group-member
+[设置群成员资料（服务端）-托管]: /platform-chat-api/group/group-profile/group-member/update-group-member-info
+[群名称备注名设置（服务端）-托管]: /platform-chat-api/group/group-profile/group-member/update-group-member-remarkname
+[特别关注群成员（服务端）-托管]: /platform-chat-api/group/group-profile/group-member/set-group-mem-follow
+[分页查询应用下群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-query/query-app-all-group
+[分页查询用户加入的群组（服务端）-托管]: /platform-chat-api/group/group-profile/group-query/query-member-join-group
+[群组托管导入功能（服务端）-托管]: /platform-chat-api/group/group-profile/group-manage/import-group

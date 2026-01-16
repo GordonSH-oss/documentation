@@ -1,0 +1,10 @@
+---
+title: 合规指南
+---
+
+import MDXContextProvider from '@site/src/components/MDXContextProvider';
+import SecurityContent from '/docs/partials/im/_security.mdx';
+
+<MDXContextProvider value={{ sdkType: 'imlib', platform: 'android' }}>
+  <SecurityContent />
+</MDXContextProvider>

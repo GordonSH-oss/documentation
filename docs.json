@@ -12,7 +12,14 @@
     "tabs": [
       {
         "tab": "Guides",
-        "groups": [
+        "g": [
+          {
+            "group": "RC docs",
+            "pages": [
+              "android-imlib/message/send",
+              "/android-imlib/message/receive"
+            ]
+          },
           {
             "group": "Getting started",
             "pages": [
