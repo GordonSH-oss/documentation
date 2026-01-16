@@ -1,16 +1,17 @@
 ---
-title: 发送消息
-sidebar_position: 10
+title: '发送消息'
+description: '介绍发送消息'
+icon: 'code'
 ---
-
-# 发送消息
 
 本文主要描述了如何使用 IMLib SDK 向单聊会话、群聊会话、聊天室会话中发送消息。
 
-:::tip
- - 如发送超级群消息，请参见超级群文档 [收发消息](../ultragroup/chat.md)。
- - 默认情况下，融云允许未加入聊天室的用户在聊天室中发送消息。若您希望未加入聊天室的用户不能通过客户端 SDK 在该聊天室发送消息，可在[融云控制台]，在 **IM 服务**>**功能配置**>**聊天室**，开启 **SDK 用户不在聊天室中不能发送消息**功能。**注意**：服务端发送聊天室消息的接口不受此配置影响。
- :::
+<Tip>
+
+- 如发送超级群消息，请参见超级群文档 [收发消息](../ultragroup/chat.md)。
+- 默认情况下，融云允许未加入聊天室的用户在聊天室中发送消息。若您希望未加入聊天室的用户不能通过客户端 SDK 在该聊天室发送消息，可在[融云控制台]，在 **IM 服务**>**功能配置**>**聊天室**，开启 **SDK 用户不在聊天室中不能发送消息**功能。**注意**：服务端发送聊天室消息的接口不受此配置影响。
+
+</Tip>
 
 ## 消息内容类型简介
 
@@ -24,14 +25,16 @@ IMLib SDK 定义的 [Message] 对象的 `content` 属性中可包含两大类消
 | GIF 消息         | [GIFMessage]       | MediaMessageContent | GIF 消息的内容。                                                  |
 | 文件消息         | [FileMessage]      | MediaMessageContent | 文件消息的内容。                                                  |
 | 语音消息         | [HQVoiceMessage]   | MediaMessageContent | 高清语音消息的内容。                                              |
-| 提及他人（@ 消息） | 不适用             | 不适用              | @消息并非预定义的消息类型。详见[如何发送 @ 消息](#mentionedinfo)。 |
+| 提及他人（@ 消息） | 不适用             | 不适用              | @消息并非预定义的消息类型。详见[如何发送 @ 消息](#如何发送--消息)。 |
 
 以上为 IMLib SDK 内置的部分消息内容类型。您还可以创建自定义的消息内容类型，并使用 `sendMessage` 方法或`sendMediaMessage` 方法发送。详见[自定义消息类型](./customize.md)。
 
-> **重要**
->
-> - 发送普通消息使用 `sendMessage` 方法，发送媒体消息使用 `sendMediaMessage` 方法。
-> - 客户端 SDK 发送消息存在频率限制，每秒最多只能发送 5 条消息。
+<Warning>
+
+- 发送普通消息使用 `sendMessage` 方法，发送媒体消息使用 `sendMediaMessage` 方法。
+- 客户端 SDK 发送消息存在频率限制，每秒最多只能发送 5 条消息。
+
+</Warning>
 
 本文使用 IMLib SDK 核心类 [RongCoreClient]（也可以用 [RongIMClient]）的发送消息方法。
 
@@ -86,25 +89,25 @@ RongCoreClient.getInstance().sendMessage(message, pushContent, pushData, new IRo
 
 - 如果消息类型为[即时通讯服务预定义消息类型]中的[用户内容类消息格式]，例如 [TextMessage]，`pushContent` 可设置为 `null`。一旦消息触发离线推送通知时，远程推送通知默认使用服务端预置的推送通知内容。关于各类型消息的默认推送通知内容，详见[用户内容类消息格式]。
 - 如果消息类型为[即时通讯服务预定义消息类型]中通知类、信令类（"撤回命令消息" 除外），且需要支持远程推送通知，则必须填写 `pushContent`，否则收件人不在线时无法收到远程推送通知。如无需触发远程推送，可不填该字段。
-- 如果消息类型为自定义消息类型，请参考[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。<!--public-cloud-only start-->
-- 请注意，聊天室会话不支持离线消息机制，因此也不支持离线消息转推送。<!--public-cloud-only end-->
+- 如果消息类型为自定义消息类型，请参考[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。
+- 请注意，聊天室会话不支持离线消息机制，因此也不支持离线消息转推送。
 
 | 参数        | 类型                   | 说明                                                                                                                                                                                                                                                           |
 |:------------|:-----------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | message     | [Message]              | 要发送的消息体。必填属性包括会话类型（`conversationType`），会话 ID（`targetId`），消息内容（`content`）。详见[消息介绍] 中对 `Message` 的结构说明。                                                                                                                      |
 | pushContent | String                 | 修改或指定远程消息推送通知栏显示的内容。您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。                                                                                                        |
-| pushData    | String                 | 远程推送附加信息。对端收到远程推送消息时，可通过以下方法获取该字段内容：<p>`io.rong.push.notification.PushNotificationMessage#getPushData()`。</p>您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。 |
+| pushData    | String                 | 远程推送附加信息。对端收到远程推送消息时，可通过以下方法获取该字段内容：`io.rong.push.notification.PushNotificationMessage#getPushData()`。您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。 |
 | callback    | [ISendMessageCallback] | 发送消息的回调。                                                                                                                                                                                                                                                |
 
 通过 `RongCoreClient` 的 `sendMessage` 方法的回调处理程序 [ISendMessageCallback]，融云服务器始终会通知您的消息是否已发送成功。当因任何问题导致发送失败时，可通过回调方法返回异常。
 
 
-:::tip
+<Tip>
 
+- 关于如何个性化配置接收方离线时收到的远程推送通知，详见下文[远程推送通知](#远程推送通知)。
+- 自定义消息类型默认不支持离线消息转推送机制。如需支持，详见下文[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。
 
- - 关于如何个性化配置接收方离线时收到的远程推送通知，详见下文[远程推送通知](#远程推送通知)。
- - 自定义消息类型默认不支持离线消息转推送机制。如需支持，详见下文[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。
-:::
+</Tip>
 
 ## 媒体消息
 
@@ -184,7 +187,7 @@ RongCoreClient.getInstance().sendMediaMessage(message, pushContent, pushData, ne
 |:------------|:----------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | message     | [Message]                   | 要发送的消息体。必填属性包括会话类型（`conversationType`），会话 ID（`targetId`），消息内容（`content`）。详见[消息介绍] 中对 `Message` 的结构说明。                                                                                                                      |
 | pushContent | String                      | 修改或指定远程消息推送通知栏显示的内容。您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。                                                                                                        |
-| pushData    | String                      | 远程推送附加信息。对端收到远程推送消息时，可通过以下方法获取该字段内容：<p>`io.rong.push.notification.PushNotificationMessage#getPushData()`。</p>您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。 |
+| pushData    | String                      | 远程推送附加信息。对端收到远程推送消息时，可通过以下方法获取该字段内容：`io.rong.push.notification.PushNotificationMessage#getPushData()`。您也可以在 `Message` 的推送属性（`MessagePushConfig`）中配置，会覆盖此处配置，详见下文[远程推送通知](#远程推送通知)。 |
 | callback    | [ISendMediaMessageCallback] | 发送媒体消息的回调                                                                                                                                                                                                                                             |
 
 通过 `RongCoreClient` 的 `sendMediaMessage` 方法的回调处理程序 [ISendMediaMessageCallback]，融云服务器始终会通知媒体文件上传进度，以及您的消息是否已发送成功。当因任何问题导致发送失败时，可通过回调方法返回异常。
@@ -192,12 +195,12 @@ RongCoreClient.getInstance().sendMediaMessage(message, pushContent, pushData, ne
 发送媒体消息的方法默认将媒体文件上传到融云的文件服务器，您可以在客户端应用程序 [下载媒体消息文件](./download-media-file.md)。融云对上传媒体文件大小进行了限制，GIF 大小限制为 2 MB，文件上传限制为 100 MB。如果您需要提高 GIF 文件上限，可[提交工单]，文件上传的上限不可调。
 
 
-:::tip
+<Tip>
 
+- 关于如何个性化配置接收方离线时收到的远程推送通知，详见下文[远程推送通知](#远程推送通知)。
+- 自定义消息类型默认不支持离线消息转推送机制。如需支持，详见下文[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。
 
- - 关于如何个性化配置接收方离线时收到的远程推送通知，详见下文[远程推送通知](#远程推送通知)。
- - 自定义消息类型默认不支持离线消息转推送机制。如需支持，详见下文[自定义消息如何支持远程推送](#自定义消息如何支持远程推送)。
-:::
+</Tip>
 
 ### 发送媒体消息并且上传到自己的服务器
 
@@ -271,7 +274,7 @@ RongCoreClient.getInstance().sendMediaMessage(
         message, pushContent, pushData, sendMediaMessageCallbackWithUploader);
 ```
 
-## 如何发送 @ 消息 {#mentionedinfo}
+## 如何发送 @ 消息
 
 @消息在融云即时通讯服务中不属于一种预定义的消息类型（详见服务端文档 [消息类型概述]）。融云通过在消息中携带 `mentionedInfo` 数据，帮助 App 实现提及他人（@）功能。
 
@@ -293,7 +296,7 @@ messageContent.setMentionedInfo(mentionedInfo);
 | 参数             | 类型           | 说明                                                                                                                                                                                                            |
 |:-----------------|:---------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | type             | MentionedType  | （必填）指定 `MentionedInfo` 的类型。`MentionedType.ALL` 表示需要提及（@）所有人。`MentionedType.PART` 表示需要 @ 部分人，被提及的人员需要在 `userIdList` 中指定。                                                      |
-| userIdList       | List\<String\> | 被提及（@）用户的 ID 集合。当 `type` 为 `MentionedType.PART` 时必填；从 5.3.1 版本开始，支持当 `type` 为 `MentionedType.ALL` 时同时在 `userIdList` 中提及部分人。接收端可通过 `mentionedInfo` 获取 `userIdList` 数据。 |
+| userIdList       | `List<String>` | 被提及（@）用户的 ID 集合。当 `type` 为 `MentionedType.PART` 时必填；从 5.3.1 版本开始，支持当 `type` 为 `MentionedType.ALL` 时同时在 `userIdList` 中提及部分人。接收端可通过 `mentionedInfo` 获取 `userIdList` 数据。 |
 | mentionedContent | String         | 触发离线消息推送时，通知栏显示的内容。如果是 `NULL`，则显示默认提示内容（“有人 @ 你”）。@消息携带的 `mentionedContent` 优先级最高，会覆盖所有默认或自定义的 `pushContent` 数据。                                        |
 
 以下示例展示了发送一条提及部分用户的文本消息，该消息发往一个群聊会话。
@@ -345,10 +348,11 @@ MentionedInfo mentionedInfo = message.getContent().getMentionedInfo();
 
 ## 远程推送通知
 
-:::tip
+<Tip>
 
- 聊天室会话不支持离线消息机制，因此也不支持离线消息转推送。
-:::
+聊天室会话不支持离线消息机制，因此也不支持离线消息转推送。
+
+</Tip>
 
 
 如果您的应用已经在融云配置第三方推送，在消息接收方离线时，融云服务端会根据消息类型、接收方支持的推送通道、接收方的免打扰设置等，决定是否触发远程推送。
@@ -402,39 +406,39 @@ Message message = Message.obtain(mTargetId, mConversationType, textMessage);
 | pushTitle              | String        | 推送标题，此处指定的推送标题优先级最高。如不设置，可参考 [用户内容类消息格式] 中对各内置消息类型默认**推送通知标题**与**推送通知内容**的说明。                                                                                                                                                                                               |
 | pushContent            | String        | 推送内容。此处指定的推送内容优先级最高。如不设置，可参考 [用户内容类消息格式] 中对各内置消息类型默认**推送通知标题**与**推送通知内容**的说明。                                                                                                                                                                                               |
 | pushData               | String        | 远程推送附加信息。如不设置，则使用消息发送参数中设置的 `pushData` 值。对端收到远程推送通知时，可通过以下方法获取该字段内容：`io.rong.push.notification.PushNotificationMessage#getPushData()`。                                                                                                                                                |
-| forceShowDetailContent | boolean       | 是否越过目标客户端的配置，强制在推送通知内显示通知内容（`pushContent`）。<br/><br/>客户端设备可通过 `setPushContentShowStatus` 设置在接收推送通知时仅显示类似「您收到了一条通知」的提醒。发送消息时，可设置 `forceShowDetailContent` 为 1 越过该配置，强制目标客户端在此条消息的推送通知中显示推送内容。                                           |
+| forceShowDetailContent | boolean       | 是否越过目标客户端的配置，强制在推送通知内显示通知内容（`pushContent`）。客户端设备可通过 `setPushContentShowStatus` 设置在接收推送通知时仅显示类似「您收到了一条通知」的提醒。发送消息时，可设置 `forceShowDetailContent` 为 1 越过该配置，强制目标客户端在此条消息的推送通知中显示推送内容。                                           |
 | iOSConfig              | IOSConfig     | iOS 平台推送通知配置。目标端设备为 iOS 平台设备时，适用该配置。详细说明见 **`iOSConfig` 属性说明**。                                                                                                                                                                                                                                         |
 | androidConfig          | AndroidConfig | Android 平台推送通知配置。目标端设备为 Android 平台设备时，适用该配置。详细说明见 **`AndroidConfig` 属性说明**。                                                                                                                                                                                                                             |
-| templateId             | String        | 推送模板 ID。根据目标客户端用户通过 `RongIMClient` 中的 `setPushLanguageCode` 设置的语言环境，匹配模板 ID 所对应的模板中设置的语言内容进行推送。未匹配成功时使用默认内容进行推送。<br/><br/>模板内容在**控制台** > **自定义推送文案**中进行设置，具体操作请参见 [配置和使用自定义多语言推送模板](https://help.rongcloud.cn/t/topic/1030)。 |
+| templateId             | String        | 推送模板 ID。根据目标客户端用户通过 `RongIMClient` 中的 `setPushLanguageCode` 设置的语言环境，匹配模板 ID 所对应的模板中设置的语言内容进行推送。未匹配成功时使用默认内容进行推送。模板内容在**控制台** > **自定义推送文案**中进行设置，具体操作请参见 [配置和使用自定义多语言推送模板](https://help.rongcloud.cn/t/topic/1030)。 |
 
-- `iOSConfig` 属性说明
+### `iOSConfig` 属性说明
 
-    | 参数              | 类型   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-    |:------------------|:-------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-    | threadId          | String | iOS 平台通知栏分组 ID，相同的 `threadId` 推送分为一组（iOS10 开始支持）。                                                                                                                                                                                                                                                                                                                                                                                                      |
-    | apnsCollapseId    | String | iOS 平台通知覆盖 ID，`apnsCollapseId` 相同时，新收到的通知会覆盖老的通知，最大 64 字节（iOS10 开始支持）。                                                                                                                                                                                                                                                                                                                                                                       |
-    | richMediaUri      | String | iOS 推送自定义的通知栏消息右侧图标 URL，需要 App 自行解析 `richMediaUri` 并实现展示。图片要求：大小 120 * 120px，格式为 png 或者 jpg 格式。SDK 从 5.2.4 版本开始支持携带该字段。                                                                                                                                                                                                                                                                                                 |
-    | interruptionLevel | String | 适用于 iOS 15 及之后的系统。取值为 `passive`，`active`（默认），`time-sensitive`，或 `critical`，取值说明详见对应的 [APNs 的 interruption-level](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification?language=objc) 字段。在 iOS 15 及以上版本中，系统的 “定时推送摘要”、“专注模式” 都可能导致重要的推送通知（例如余额变化）无法及时被用户感知的情况，可考虑设置该字段。SDK 5.6.7 及以上版本支持该字段。 |
+| 参数              | 类型   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|:------------------|:-------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| threadId          | String | iOS 平台通知栏分组 ID，相同的 `threadId` 推送分为一组（iOS10 开始支持）。                                                                                                                                                                                                                                                                                                                                                                                                      |
+| apnsCollapseId    | String | iOS 平台通知覆盖 ID，`apnsCollapseId` 相同时，新收到的通知会覆盖老的通知，最大 64 字节（iOS10 开始支持）。                                                                                                                                                                                                                                                                                                                                                                       |
+| richMediaUri      | String | iOS 推送自定义的通知栏消息右侧图标 URL，需要 App 自行解析 `richMediaUri` 并实现展示。图片要求：大小 120 * 120px，格式为 png 或者 jpg 格式。SDK 从 5.2.4 版本开始支持携带该字段。                                                                                                                                                                                                                                                                                                 |
+| interruptionLevel | String | 适用于 iOS 15 及之后的系统。取值为 `passive`，`active`（默认），`time-sensitive`，或 `critical`，取值说明详见对应的 [APNs 的 interruption-level](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification?language=objc) 字段。在 iOS 15 及以上版本中，系统的 "定时推送摘要"、"专注模式" 都可能导致重要的推送通知（例如余额变化）无法及时被用户感知的情况，可考虑设置该字段。SDK 5.6.7 及以上版本支持该字段。 |
 
-- `AndroidConfig` 属性说明
+### `AndroidConfig` 属性说明
 
-    | 参数            | 类型   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-    |:----------------|:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-    | notificationId  | String | Android 平台 Push 唯一标识，目前支持小米、华为推送平台，默认开发者不需要进行设置，当消息产生推送时，消息的 `messageUId` 作为 `notificationId` 使用。                                                                                                                                                                                                                                                                                                  |
-    | channelIdMi     | String | 小米推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [小米推送消息分类新规](https://dev.mi.com/console/doc/detail?pId=2422#_4)。                                                                                                                                                                                                                                                                                                         |
-    | imageUrlMi      | String | （**由于小米官方已停止支持该能力，该字段已失效**）小米通知类型的推送所使用的通知图片 url。图片要求：大小120 * 120px，格式为 png 或者 jpg 格式。<br />此属性 5.1.7 及以上版本支持。支持 MIUI 国内版（国内版要求为 MIUI 12 及以上）和国际版。                                                                                                                                                                                                                |
-    | channelIdHW     | String | 华为推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [华为自定义通知渠道](https://developer.huawei.com/consumer/cn/doc/development/HMSCore-Guides/android-custom-chan-0000001050040122)。更多通知渠道信息，请参见 [Android 官方文档](https://developer.android.com/training/notify-user/channels)。                                                                                                                                        |
-    | imageUrlHW      | String | 华为推送通知中自定义的通知栏消息右侧小图片 URL，如果不设置，则不展示通知栏右侧图片。图标文件须小于 512 KB，图标建议规格大小：40dp x 40dp，弧角大小为 8dp，超出建议规格大小的图标会存在图片压缩或显示不全的情况。<br />此属性 5.1.7 及以上版本支持。                                                                                                                                                                                                      |
-    | importanceHW    | String | 华为推送的消息提醒级别。`LOW` 表示通知栏消息预期的提醒方式为静默提醒，消息到达手机后，无铃声震动。`NORMAL` 表示通知栏消息预期的提醒方式为强提醒，消息到达手机后，以铃声、震动提醒用户。终端设备实际消息提醒方式将根据 `categoryHW` 字段取值、或者控制台配置的 `category` 字段取值，或者[华为智能分类]结果进行调整。SDK 5.1.3 及以上版本支持该字段。                                                                                                     |
-    | categoryHW      | String | 华为推送通道的消息自分类标识，默认为空。category 取值必须为大写字母，例如 `IM`。App 根据华为要求完成[华为自分类权益申请] 或 [申请特殊权限] 后可传入该字段有效。详见华为推送官方文档[华为消息分类标准]。该字段优先级高于控制台为 App Key 下的**应用标识**配置的华为推送 Category。SDK 5.4.0 及以上版本支持该字段。                                                                                                                                   |
-    | imageUrlHonor   | String | 荣耀推送通知中用户自定义的通知栏右侧大图标 URL，如果不设置，则不展示通知栏右侧图标。图标文件须小于 512 KB，图标建议规格大小：40dp x 40dp，弧角大小为 8dp，超出建议规格大小的图标会存在图片压缩或显示不全的情况。SDK 5.6.7 及以上版本支持该字段。                                                                                                                                                                                                         |
-    | importanceHonor | String | 荣耀推送的 Android 通知消息分类，决定用户设备消息通知行为。`LOW` 表示资讯营销类消息。`NORMAL`（默认值）表示服务与通讯类消息。SDK 5.6.7 及以上版本支持该字段。                                                                                                                                                                                                                                                                                          |
-    | typeVivo        | String | VIVO 推送服务的消息类别。可选值 `0`（运营消息） 和 `1`（系统消息）。该参数对应 VIVO 推送服务的 `classification` 字段，详见 [VIVO 推送消息分类说明]。                                                                                                                                                                                                                                                                                                    |
-    | categoryVivo    | String | VIVO 推送服务的消息二级分类。例如 `IM`（即时消息）。该参数对应 VIVO 推送服务的 `category` 字段。详细的 category 取值请参见 [VIVO 推送消息分类说明]。如果指定二级分类 `categoryVivo`，必须同时指定 `typeVivo`（系统消息或运营消息）。请注意遵照 VIVO 官方要求，确保二级分类属于 VIVO 系统消息场景或运营消息场景下允许发送的内容。`categoryVivo` 字段优先级高于控制台为 App Key 下的**应用标识**配置的 VIVO 推送 Category。SDK 5.4.2 及以上版本支持该字段。 |
-    | channelIdOPPO   | String | OPPO 推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [OPPO PUSH 通道升级说明](https://open.oppomobile.com/new/developmentDoc/info?id=11227)。                                                                                                                                                                                                                                                                                           |
-    | channelIdFCM    | String | FCM 推送通知渠道的 ID。应用程序必须先创建一个具有此频道 ID 的频道，然后才能收到具有此频道 ID 的任何通知。更多信息请参见[安卓官方文档](https://developer.android.com/guide/topics/ui/notifiers/notifications?hl=zh-cn#ManageChannels)。                                                                                                                                                                                                              |
-    | collapseKeyFCM  | String | FCM 推送的通知分组 ID。SDK 5.1.3 及以上版本支持该字段。**注意**，如使用该字段，请确保控制台的 FCM 推送配置中推送方式为**通知消息方式**。                                                                                                                                                                                                                                                                                                         |
-    | imageUrlFCM     | String | FCM 推送的通知栏右侧图标 URL。如果不设置，则不展示通知栏右侧图标。SDK 5.1.3 及以上版本支持该字段。**注意**，如使用该字段，请确保控制台的 FCM 推送配置鉴权方式为**证书**，推送方式为**通知消息方式**。                                                                                                                                                                                                                                               |
+| 参数            | 类型   | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|:----------------|:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| notificationId  | String | Android 平台 Push 唯一标识，目前支持小米、华为推送平台，默认开发者不需要进行设置，当消息产生推送时，消息的 `messageUId` 作为 `notificationId` 使用。                                                                                                                                                                                                                                                                                                  |
+| channelIdMi     | String | 小米推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [小米推送消息分类新规](https://dev.mi.com/console/doc/detail?pId=2422#_4)。                                                                                                                                                                                                                                                                                                         |
+| imageUrlMi      | String | （**由于小米官方已停止支持该能力，该字段已失效**）小米通知类型的推送所使用的通知图片 url。图片要求：大小120 * 120px，格式为 png 或者 jpg 格式。此属性 5.1.7 及以上版本支持。支持 MIUI 国内版（国内版要求为 MIUI 12 及以上）和国际版。                                                                                                                                                                                                                |
+| channelIdHW     | String | 华为推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [华为自定义通知渠道](https://developer.huawei.com/consumer/cn/doc/development/HMSCore-Guides/android-custom-chan-0000001050040122)。更多通知渠道信息，请参见 [Android 官方文档](https://developer.android.com/training/notify-user/channels)。                                                                                                                                        |
+| imageUrlHW      | String | 华为推送通知中自定义的通知栏消息右侧小图片 URL，如果不设置，则不展示通知栏右侧图片。图标文件须小于 512 KB，图标建议规格大小：40dp x 40dp，弧角大小为 8dp，超出建议规格大小的图标会存在图片压缩或显示不全的情况。此属性 5.1.7 及以上版本支持。                                                                                                                                                                                                      |
+| importanceHW    | String | 华为推送的消息提醒级别。`LOW` 表示通知栏消息预期的提醒方式为静默提醒，消息到达手机后，无铃声震动。`NORMAL` 表示通知栏消息预期的提醒方式为强提醒，消息到达手机后，以铃声、震动提醒用户。终端设备实际消息提醒方式将根据 `categoryHW` 字段取值、或者控制台配置的 `category` 字段取值，或者[华为智能分类]结果进行调整。SDK 5.1.3 及以上版本支持该字段。                                                                                                     |
+| categoryHW      | String | 华为推送通道的消息自分类标识，默认为空。category 取值必须为大写字母，例如 `IM`。App 根据华为要求完成[华为自分类权益申请] 或 [申请特殊权限] 后可传入该字段有效。详见华为推送官方文档[华为消息分类标准]。该字段优先级高于控制台为 App Key 下的**应用标识**配置的华为推送 Category。SDK 5.4.0 及以上版本支持该字段。                                                                                                                                   |
+| imageUrlHonor   | String | 荣耀推送通知中用户自定义的通知栏右侧大图标 URL，如果不设置，则不展示通知栏右侧图标。图标文件须小于 512 KB，图标建议规格大小：40dp x 40dp，弧角大小为 8dp，超出建议规格大小的图标会存在图片压缩或显示不全的情况。SDK 5.6.7 及以上版本支持该字段。                                                                                                                                                                                                         |
+| importanceHonor | String | 荣耀推送的 Android 通知消息分类，决定用户设备消息通知行为。`LOW` 表示资讯营销类消息。`NORMAL`（默认值）表示服务与通讯类消息。SDK 5.6.7 及以上版本支持该字段。                                                                                                                                                                                                                                                                                          |
+| typeVivo        | String | VIVO 推送服务的消息类别。可选值 `0`（运营消息） 和 `1`（系统消息）。该参数对应 VIVO 推送服务的 `classification` 字段，详见 [VIVO 推送消息分类说明]。                                                                                                                                                                                                                                                                                                    |
+| categoryVivo    | String | VIVO 推送服务的消息二级分类。例如 `IM`（即时消息）。该参数对应 VIVO 推送服务的 `category` 字段。详细的 category 取值请参见 [VIVO 推送消息分类说明]。如果指定二级分类 `categoryVivo`，必须同时指定 `typeVivo`（系统消息或运营消息）。请注意遵照 VIVO 官方要求，确保二级分类属于 VIVO 系统消息场景或运营消息场景下允许发送的内容。`categoryVivo` 字段优先级高于控制台为 App Key 下的**应用标识**配置的 VIVO 推送 Category。SDK 5.4.2 及以上版本支持该字段。 |
+| channelIdOPPO   | String | OPPO 推送通知渠道的 ID。详细使用方式及创建方法请参见第三方文档 [OPPO PUSH 通道升级说明](https://open.oppomobile.com/new/developmentDoc/info?id=11227)。                                                                                                                                                                                                                                                                                           |
+| channelIdFCM    | String | FCM 推送通知渠道的 ID。应用程序必须先创建一个具有此频道 ID 的频道，然后才能收到具有此频道 ID 的任何通知。更多信息请参见[安卓官方文档](https://developer.android.com/guide/topics/ui/notifiers/notifications?hl=zh-cn#ManageChannels)。                                                                                                                                                                                                              |
+| collapseKeyFCM  | String | FCM 推送的通知分组 ID。SDK 5.1.3 及以上版本支持该字段。**注意**，如使用该字段，请确保控制台的 FCM 推送配置中推送方式为**通知消息方式**。                                                                                                                                                                                                                                                                                                         |
+| imageUrlFCM     | String | FCM 推送的通知栏右侧图标 URL。如果不设置，则不展示通知栏右侧图标。SDK 5.1.3 及以上版本支持该字段。**注意**，如使用该字段，请确保控制台的 FCM 推送配置鉴权方式为**证书**，推送方式为**通知消息方式**。                                                                                                                                                                                                                                               |
 
 ### 自定义消息如何支持远程推送
 
@@ -443,10 +447,11 @@ Message message = Message.obtain(mTargetId, mConversationType, textMessage);
 - 如果消息类型为自定义消息类型，且需要支持离线推送通知，则必须向融云提供 `pushContent` 字段，否则用户无法收到离线推送通知。
 - 如果消息类型为自定义消息类型，但不需要支持远程推送通知（例如通过自定义消息类型实现的 App 业务层操作指令），可将 `pushContent` 字段留空。
 
-:::tip
+<Tip>
 
- 如果要自定义消息启用离线推送通知能力，请务必发送消息的入参或消息推送属性向融云提供 `pushContent` 字段内容，否则接收方用户无法收到离线推送通知。
-:::
+如果要自定义消息启用离线推送通知能力，请务必发送消息的入参或消息推送属性向融云提供 `pushContent` 字段内容，否则接收方用户无法收到离线推送通知。
+
+</Tip>
 
 
 ### 为消息禁用推送通知
@@ -491,7 +496,6 @@ message.setMessageConfig(new MessageConfig.Builder().setDisableNotification(true
 - App 循环调用客户端的发送消息 API。请注意，客户端 SDK 限制发送消息的频率上限为每秒 5 条。
 - App 在业务服务端接入即时通讯服务端 API（IM Server API），由 App 业务服务端群发消息。IM Server API 的 [发送单聊消息] 接口支持单次向多个用户发送单聊消息。您也可以通过 [发送群聊消息]、[发送聊天室消息]接口实现单次向多个群组或多个聊天室发送消息。
 
-<!-- links -->
 [融云控制台]: https://console.rongcloud.cn/agile/im/service/config#%E8%81%8A%E5%A4%A9%E5%AE%A4
 [消息介绍]: ./introduction.md
 [即时通讯服务预定义消息类型]: /platform-chat-api/message-about/about-message-types
@@ -501,7 +505,6 @@ message.setMessageConfig(new MessageConfig.Builder().setDisableNotification(true
 [发送聊天室消息]: /platform-chat-api/message/send-chatroom
 [用户内容类消息格式]: /platform-chat-api/message-about/objectname
 [提交工单]: https://console.rongcloud.cn/agile/formwork/ticket/create
-<!-- Javadoc -->
 [RongIMClient]: https://doc.rongcloud.cn/apidoc/imlib-android/latest/zh_CN/html/-android--i-m-lib--s-d-k/io.rong.imlib/-rong-i-m-client/index.html
 [RongCoreClient]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-rong-core-client/index.html
 [sendMessage]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-rong-core-client/send-message.html
@@ -519,11 +522,9 @@ message.setMessageConfig(new MessageConfig.Builder().setDisableNotification(true
 [IRongCoreCallback.MediaMessageUploader]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-i-rong-core-callback/-media-message-uploader/index.html
 [MessagePushConfig]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib.model/-message-push-config/index.html
 [MentionedInfo]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib.model/-mentioned-info/index.html
-<!-- callbacks -->
 [ISendMessageCallback]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-i-rong-core-callback/-i-send-message-callback/index.html
 [ISendMediaMessageCallback]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-i-rong-core-callback/-i-send-media-message-callback/index.html
 [ISendMediaMessageCallbackWithUploader]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-i-rong-core-callback/-i-send-media-message-callback-with-uploader/index.html
-<!-- external -->
 [VIVO 推送消息分类说明]: https://dev.vivo.com.cn/documentCenter/doc/359
 [华为自分类权益申请]: https://developer.huawei.com/consumer/cn/doc/development/HMSCore-Guides/message-classification-0000001149358835#section893184112272
 [申请特殊权限]: https://developer.huawei.com/consumer/cn/doc/development/HMSCore-Guides/faq-0000001050042183#section037425218509
