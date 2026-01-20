@@ -1,0 +1,163 @@
+---
+title: '接收消息'
+description: '介绍接收消息'
+icon: 'code'
+---
+
+本文主要描述了如何使用 IMLib SDK 接收单聊会话、群聊会话、聊天室会话中的消息。
+
+## 消息接收概述
+
+IMLib SDK 通过消息监听器接收消息。您需要在应用初始化时设置消息监听器，当有新消息到达时，SDK 会通过回调通知您的应用。
+
+## 设置消息监听器
+
+使用 [RongCoreClient] 或 [RongIMClient] 的 `setOnReceiveMessageListener` 方法设置消息监听器。
+
+```java
+RongCoreClient.setOnReceiveMessageListener(new RongCoreClient.OnReceiveMessageWrapperListener() {
+    @Override
+    public boolean onReceived(Message message, int left, boolean hasPackage, boolean offline) {
+        // message: 接收到的消息对象
+        // left: 剩余未接收的消息数量
+        // hasPackage: 是否还有后续消息包
+        // offline: 是否为离线消息
+        
+        // 处理接收到的消息
+        
+        // 返回 false 表示继续执行后续的消息监听器
+        // 返回 true 表示拦截该消息，不再执行后续的消息监听器
+        return false;
+    }
+});
+```
+
+### 回调参数说明
+
+| 参数       | 类型    | 说明                                                                 |
+|:-----------|:--------|:-------------------------------------------------------------------|
+| message    | Message | 接收到的消息对象。详见[消息介绍]中对 `Message` 的结构说明。              |
+| left       | int     | 剩余未接收的消息数量。                                                |
+| hasPackage | boolean | 是否还有后续消息包。                                                  |
+| offline    | boolean | 是否为离线消息。`true` 表示离线消息，`false` 表示在线接收的实时消息。    |
+
+## 处理接收到的消息
+
+接收到消息后，您可以根据消息类型进行不同的处理。
+
+```java
+RongCoreClient.setOnReceiveMessageListener(new RongCoreClient.OnReceiveMessageWrapperListener() {
+    @Override
+    public boolean onReceived(Message message, int left, boolean hasPackage, boolean offline) {
+        // 获取消息内容
+        MessageContent messageContent = message.getContent();
+        
+        // 根据消息类型进行处理
+        if (messageContent instanceof TextMessage) {
+            TextMessage textMessage = (TextMessage) messageContent;
+            String content = textMessage.getContent();
+            // 处理文本消息
+        } else if (messageContent instanceof ImageMessage) {
+            ImageMessage imageMessage = (ImageMessage) messageContent;
+            // 处理图片消息
+        } else if (messageContent instanceof FileMessage) {
+            FileMessage fileMessage = (FileMessage) messageContent;
+            // 处理文件消息
+        }
+        // 其他消息类型处理...
+        
+        return false;
+    }
+});
+```
+
+## 接收 @ 消息
+
+如果消息中包含 @ 信息，您可以通过以下方式获取：
+
+```java
+MessageContent messageContent = message.getContent();
+MentionedInfo mentionedInfo = messageContent.getMentionedInfo();
+
+if (mentionedInfo != null) {
+    // 获取 @ 类型
+    MentionedInfo.MentionedType type = mentionedInfo.getType();
+    
+    // 获取被 @ 的用户 ID 列表
+    List<String> userIdList = mentionedInfo.getMentionedUserIdList();
+    
+    // 获取 @ 消息的推送内容
+    String mentionedContent = mentionedInfo.getMentionedContent();
+}
+```
+
+## 接收媒体消息
+
+接收到媒体消息后，您可以获取媒体文件的本地路径或远程 URL。
+
+```java
+if (messageContent instanceof ImageMessage) {
+    ImageMessage imageMessage = (ImageMessage) messageContent;
+    
+    // 获取缩略图 URI
+    Uri thumbUri = imageMessage.getThumUri();
+    
+    // 获取原图 URI
+    Uri localUri = imageMessage.getLocalUri();
+    
+    // 获取远程图片 URL
+    Uri remoteUri = imageMessage.getRemoteUri();
+}
+```
+
+对于需要下载的媒体文件，详见[下载媒体消息文件](./download-media-file.md)。
+
+## 获取消息附加信息
+
+如果发送方在消息中携带了附加信息，您可以通过以下方式获取：
+
+```java
+// 获取消息内容的附加信息
+MessageContent messageContent = message.getContent();
+String extra = messageContent.getExtra();
+
+// 获取消息的用户信息
+String userInfo = messageContent.getUserInfo();
+```
+
+<Warning>
+
+请注意区分 `MessageContent.extra` 和 `Message.extra`：
+- `MessageContent.extra` 会随消息发送到对端
+- `Message.extra` 仅在本地使用，不会发送到服务端
+
+</Warning>
+
+## 离线消息
+
+当用户离线时，融云服务器会为单聊、群聊、系统会话缓存离线消息（最多缓存 7 天）。用户重新上线后，SDK 会自动拉取离线消息并通过消息监听器回调。
+
+您可以通过回调参数中的 `offline` 字段判断消息是否为离线消息：
+
+```java
+@Override
+public boolean onReceived(Message message, int left, boolean hasPackage, boolean offline) {
+    if (offline) {
+        // 这是一条离线消息
+    } else {
+        // 这是一条在线接收的实时消息
+    }
+    return false;
+}
+```
+
+<Tip>
+
+- 聊天室会话不支持离线消息机制。
+- 超级群消息不支持自动拉取离线消息，需要主动拉取。详见超级群文档[收发消息](../ultragroup/chat.md)。
+
+</Tip>
+
+[消息介绍]: ./introduction.md
+[RongIMClient]: https://doc.rongcloud.cn/apidoc/imlib-android/latest/zh_CN/html/-android--i-m-lib--s-d-k/io.rong.imlib/-rong-i-m-client/index.html
+[RongCoreClient]: https://doc.rongcloud.cn/apidoc/imlibcore-android/latest/zh_CN/html/-android--i-m-lib-core--s-d-k/io.rong.imlib/-rong-core-client/index.html
