@@ -16,7 +16,8 @@
           {
             "group": "RC docs",
             "pages": [
-              "android-imlib/send"
+              "android-imlib/send",
+              "android-imlib/receive"
             ]
           },
           {
